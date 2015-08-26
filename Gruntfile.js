@@ -4,6 +4,20 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
     concat: {
       //your code here
+      options: {
+        // define a string to put between each file in the concatenated output
+        separator: ';'
+      },
+      js: {
+        src: [
+              'public/client/*.js',
+             ],
+        dest: 'public/dist/<%= pkg.name %>.js'
+      },
+      css: {
+        src:  'public/*.css',
+        dest: 'public/dist/<%= pkg.name %>.css'
+      }
     },
 
     mochaTest: {
@@ -22,12 +36,21 @@ module.exports = function(grunt) {
     },
 
     uglify: {
-      //your code here
+      options: {
+        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+    //    mangle: false
+      },
+      build: {
+        files: {
+          'public/dist/<%= pkg.name %>.min.js': ['public/dist/<%= pkg.name %>.js']
+        }
+      }
     },
 
     jshint: {
       files: [
-        // Add filespec list here
+        'public/client/*.js',
+        'public/lib/*.js'
       ],
       options: {
         force: 'true',
@@ -40,18 +63,27 @@ module.exports = function(grunt) {
     },
 
     cssmin: {
-      //your code here
+      options: {
+        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+      },
+      build: {
+        files: {
+          'public/dist/<%= pkg.name %>.min.css': ['public/dist/<%= pkg.name %>.css']
+        }
+      }
     },
 
     watch: {
       scripts: {
         files: [
-          'public/client/**/*.js',
-          'public/lib/**/*.js',
+          'public/client/*.js',
+          'public/lib/*.js',
         ],
         tasks: [
           'concat',
-          'uglify'
+          'uglify',
+          'jshint',
+          'mochaTest'
         ]
       },
       css: {
@@ -59,7 +91,8 @@ module.exports = function(grunt) {
         tasks: ['cssmin']
       },
       server: {
-        //your code here
+        files: './*.js',
+        tasks: ['mochaTest']
       }
     },
 
@@ -68,6 +101,7 @@ module.exports = function(grunt) {
         //can be used to auto-deploy to Heroku/Azure.
       }
     },
+
   });
 
   grunt.loadNpmTasks('grunt-contrib-uglify');
