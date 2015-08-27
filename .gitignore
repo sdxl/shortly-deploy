@@ -41,6 +41,3 @@ node_modules
 ### PhPStorm ###
 .idea/
 
-### Dist ###
-public/dist
-
