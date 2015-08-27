@@ -8,22 +8,17 @@ module.exports = function(grunt) {
         // define a string to put between each file in the concatenated output
         separator: ';'
       },
-      js: {
-        src: [
-              'public/client/*.js',
-             ],
+      dist: {
+        src: 'public/client/*.js',
         dest: 'public/dist/<%= pkg.name %>.js'
-      },
-      css: {
-        src:  'public/*.css',
-        dest: 'public/dist/<%= pkg.name %>.css'
       }
     },
 
     mochaTest: {
       test: {
         options: {
-          reporter: 'spec' //nyan, xunit, html-cov, dot, min, markdown
+          reporter: 'spec', //nyan, xunit, html-cov, dot, min, markdown
+          bail: true
         },
         src: ['test/**/*.js']
       }
@@ -40,11 +35,13 @@ module.exports = function(grunt) {
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
     //    mangle: false
       },
-      build: {
-        files: {
-          'public/dist/<%= pkg.name %>.min.js': ['public/dist/<%= pkg.name %>.js']
+
+        dist: {
+          src: 'public/dist/<%= pkg.name %>.js',
+          dest:'public/dist/<%= pkg.name %>.min.js'
+
         }
-      }
+
     },
 
     jshint: {
@@ -66,11 +63,13 @@ module.exports = function(grunt) {
       options: {
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
       },
-      build: {
-        files: {
-          'public/dist/<%= pkg.name %>.min.css': ['public/dist/<%= pkg.name %>.css']
+
+        dist: {
+          src: 'public/style.css',
+          dest: 'public/dist/<%= pkg.name %>.min.css'
+
         }
-      }
+
     },
 
     watch: {
@@ -98,7 +97,12 @@ module.exports = function(grunt) {
 
     shell: {
       prodServer: {
-        //can be used to auto-deploy to Heroku/Azure.
+        command: [
+        'git add .',
+        'git commit -m "Heroku run"',
+        'git push heroku master',
+        'heroku open'
+        ].join('&&')
       }
     },
 
@@ -131,27 +135,27 @@ module.exports = function(grunt) {
   ////////////////////////////////////////////////////
 
   grunt.registerTask('test', [
+    'jshint',
     'mochaTest'
-    //your code here
   ]);
 
   grunt.registerTask('build', [
-    //your code here
+    'concat',
+    'uglify',
+    'cssmin'
   ]);
 
   //can be used to auto-deploy.
   grunt.registerTask('upload', function(n) {
     //Grunt options are ways to customize tasks.  Research ways to use them.
     if(grunt.option('prod')) {
-      // add your production server task here
+      grunt.task.run(['shell']);
     } else {
       grunt.task.run([ 'server-dev' ]);
     }
   });
 
-  grunt.registerTask('deploy', [
-    // add your deploy tasks here
-  ]);
+  grunt.registerTask('deploy', ['test', 'build', 'upload']);
 
 
 };
